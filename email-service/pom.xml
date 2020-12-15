@@ -21,6 +21,7 @@
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>1.10.3.Final</quarkus.platform.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
+    <dumbster.version>1.7.1</dumbster.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -39,6 +40,11 @@
       <artifactId>quarkus-arc</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.kirviq</groupId>
+      <artifactId>dumbster</artifactId>
+      <version>${dumbster.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
     </dependency>
@@ -55,6 +61,11 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>javax.mail-api</artifactId>
+      <version>1.6.2</version>
     </dependency>
   </dependencies>
   <build>
