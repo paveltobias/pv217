@@ -1,6 +1,5 @@
 package cz.fi.muni.pv217.dlp.SmtpServer.Message;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;

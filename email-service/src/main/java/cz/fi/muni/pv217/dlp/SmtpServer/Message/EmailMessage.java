@@ -1,8 +1,6 @@
 package cz.fi.muni.pv217.dlp.SmtpServer.Message;
 
 import javax.mail.Message;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +33,16 @@ public class EmailMessage {
         this.recipients = recipients;
         this.subject = subject;
         this.body = body;
+    }
+
+    @Override
+    public String toString() {
+        return "EmailMessage{" +
+                "from='" + from + '\'' +
+                ", recipients=" + recipients +
+                ", subject='" + subject + '\'' +
+                ", body='" + body + '\'' +
+                '}';
     }
 
     public static class Builder {

@@ -22,6 +22,7 @@
     <quarkus.platform.version>1.10.3.Final</quarkus.platform.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
     <dumbster.version>1.7.1</dumbster.version>
+    <javax.mail.version>1.6.2</javax.mail.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -38,6 +39,11 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-arc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+      <version>${javax.mail.version}</version>
     </dependency>
     <dependency>
       <groupId>com.github.kirviq</groupId>
