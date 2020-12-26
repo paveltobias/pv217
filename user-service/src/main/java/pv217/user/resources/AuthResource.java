@@ -31,7 +31,7 @@ public class AuthResource {
         }
         HashSet<String> groups = new HashSet<>();
         groups.add(person.role.toString());
-        String jwt = Jwt.groups(groups).claim("userId", person.id).sign();
+        String jwt = Jwt.groups(groups).upn(person.id.toString()).sign();
         return Response.ok(jwt).build();
     }
 }
