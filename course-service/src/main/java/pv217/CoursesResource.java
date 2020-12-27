@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
@@ -47,10 +46,21 @@ public class CoursesResource {
             .collect(Collectors.toList());
     }
 
+    @GET
+    @Path("{id}")
+    @RolesAllowed("teacher")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCourse(@PathParam("id") Long id) {
+        Course course = Course.findById(id);
+        return course != null
+            ? Response.ok(course).build()
+            : Response.status(404).build();
+    }
+
     @PATCH
     @Path("{id}")
     @RolesAllowed("teacher")
-    @Transactional(TxType.REQUIRES_NEW)
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response patchCourse(
@@ -97,7 +107,6 @@ public class CoursesResource {
             .target(uri.toString())
             .request()
             .header("Authorization", "Bearer " + jwt.getRawToken())
-            .property("id", studentIds)
             .get()
             .readEntity(new GenericType<List<User>>(){});
         return (

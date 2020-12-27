@@ -1,14 +1,16 @@
 #!/bin/bash
 
-USER_SVC=:8080
-COURSE_SVC=:8081
+EMAIL_SVC=:8080
+USER_SVC=:8081
+COURSE_SVC=:8082
+HOMEWORK_SVC=:8083
 
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=d
 DB_USER=u
 DB_PASS=p
-DB_TABLES='person course registration'
+DB_TABLES='person course assignment'
 DB_IMPORTS='user-service course-service'
 
 hit() {
@@ -32,7 +34,7 @@ assert() {
 # Clear SQL tables and re-import mock data.
 export PGPASSWORD="$DB_PASS"
 for table in $(echo $DB_TABLES); do
-    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "DELETE FROM $table;"
+    psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "TRUNCATE $table RESTART IDENTITY CASCADE;"
 done
 for svc in $(echo $DB_IMPORTS); do
     psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$svc/src/main/resources/import.sql"
@@ -58,6 +60,18 @@ assert '[]'
 hit PATCH "$COURSE_SVC/courses/1" name=SOA "$auth_teacher"
 assert '{"id":1,"name":"SOA","studentIds":[]}'
 
+# Publish an assignment.
+hit POST "$HOMEWORK_SVC/assignments" courseId:=1 description='Do something.' "$auth_teacher"
+assert '{"id":1,"courseId":1,"description":"Do something."}'
+
+# Check the assignment's persistence.
+hit GET "$HOMEWORK_SVC/assignments" "$auth_teacher"
+assert '[{"id":1,"courseId":1,"description":"Do something."}]'
+
+# Check that an unregistered student cannot see the assignment.
+hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
+assert '[]'
+
 # Check the persistence of the changed name.
 hit GET "$COURSE_SVC/courses" "$auth_teacher"
 assert '[{"id":1,"name":"SOA","studentIds":[]}]'
@@ -73,5 +87,9 @@ assert '[{"id":1,"name":"SOA","studentIds":[2]}]'
 # Check that the student can now see the course.
 hit GET "$COURSE_SVC/courses" "$auth_student"
 assert '[{"id":1,"name":"SOA","studentIds":[2]}]'
+
+# Check that the student can now see the assignment.
+hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
+assert '[{"id":1,"courseId":1,"description":"Do something."}]'
 
 echo 'Everything ok!'

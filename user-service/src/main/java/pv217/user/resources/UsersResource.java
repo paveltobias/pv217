@@ -2,6 +2,7 @@ package pv217.user.resources;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,10 +33,10 @@ public class UsersResource {
         Stream<Person> stream;
         if (id != null) {
             try {
-                List<Long> ids = Arrays
+                Set<Long> ids = Arrays
                     .stream(id.split(","))
                     .map(i -> Long.decode(i))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
                 stream = Person.streamByIds(ids);
             } catch (NumberFormatException e) {
                 return Response.status(404).build();
