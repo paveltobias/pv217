@@ -30,7 +30,7 @@ public class CoursesResource {
     public List<Course> getCourses() {
         Stream<Course> stream = jwt.getGroups().contains("teacher")
             ? Course.streamAll()
-            : Course.streamRegistered(Long.decode(jwt.getName()));
+            : Course.streamRegistered(Long.decode(jwt.getSubject()));
         return stream
             .map(c -> sanitizeCourse(c))
             .collect(Collectors.toList());
@@ -66,7 +66,7 @@ public class CoursesResource {
         sanCourse.name = course.name;
         sanCourse.studentIds = jwt.getGroups().contains("teacher")
             ? course.studentIds
-            : List.of(Long.decode(jwt.getName()));
+            : List.of(Long.decode(jwt.getSubject()));
         return sanCourse;
     }
 }
