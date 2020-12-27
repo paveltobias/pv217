@@ -1,5 +1,8 @@
 package pv217.user.entities;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import javax.persistence.Entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
@@ -12,6 +15,11 @@ public class Person extends PanacheEntity {
 
     public static Person findByEmail(String email) {
         return find("email", email).firstResult();
+    }
+
+    public static Stream<Person> streamByIds(Collection<Long> ids) {
+        Stream<Person> stream = streamAll();
+        return stream.filter(p -> ids.contains(p.id));
     }
 
     public String email;

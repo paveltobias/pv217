@@ -1,5 +1,6 @@
 package pv217;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,13 +15,23 @@ import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.http.client.utils.URIBuilder;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.logging.Logger;
 
 @Path("/courses")
 public class CoursesResource {
+    static final Logger LOG = Logger.getLogger(CoursesResource.class);
+
+    @ConfigProperty(name = "pv217.userServiceBaseUrl")
+    String userSvcBaseUrl;
+
     @Inject
     JsonWebToken jwt;
 
@@ -54,6 +65,9 @@ public class CoursesResource {
             course.name = patch.name;
         }
         if (patch.studentIds != null) {
+            if (!areStudentIds(patch.studentIds)) {
+                return Response.status(400).build();
+            }
             course.studentIds = patch.studentIds;
         }
         course.persist();
@@ -68,5 +82,27 @@ public class CoursesResource {
             ? course.studentIds
             : List.of(Long.decode(jwt.getSubject()));
         return sanCourse;
+    }
+
+    boolean areStudentIds(List<Long> studentIds) {
+        URIBuilder uri;
+        try {
+            uri = new URIBuilder(userSvcBaseUrl);
+        } catch (URISyntaxException e) {
+            LOG.error("Invalid base url: " + userSvcBaseUrl);
+            return false;
+        }
+        uri.setPath("users").setParameter("id", Utils.join(studentIds));
+        List<User> res = ClientBuilder.newClient()
+            .target(uri.toString())
+            .request()
+            .header("Authorization", "Bearer " + jwt.getRawToken())
+            .property("id", studentIds)
+            .get()
+            .readEntity(new GenericType<List<User>>(){});
+        return (
+            res.size() == studentIds.size() &&
+            res.stream().allMatch(u -> u.role.equals("student"))
+        );
     }
 }
