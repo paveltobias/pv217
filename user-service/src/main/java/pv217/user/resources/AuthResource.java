@@ -1,6 +1,7 @@
 package pv217.user.resources;
 
 import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -29,9 +30,10 @@ public class AuthResource {
         if (!info.pass.equals(person.password)) {
             return Response.status(401).build();
         }
-        HashSet<String> groups = new HashSet<>();
-        groups.add(person.role.toString());
-        String jwt = Jwt.groups(groups).claim("userId", person.id).sign();
+        HashSet<String> groups = new HashSet<String>(
+            List.of(person.role.toString())
+        );
+        String jwt = Jwt.groups(groups).subject(person.id.toString()).sign();
         return Response.ok(jwt).build();
     }
 }

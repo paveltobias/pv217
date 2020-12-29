@@ -10,5 +10,7 @@
     <module>email-service</module>
     <module>ping-service</module>
     <module>user-service</module>
+    <module>course-service</module>
+    <module>homework-service</module>
   </modules>
 </project>
