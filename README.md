@@ -7,6 +7,7 @@ For now, a rough spec draft/discussion is available [here](https://github.com/pa
 - Maven 3.6.2+
 - Docker
 - PostgreSQL
+- HTTPie
 
 ## Documentation
 
