@@ -62,11 +62,11 @@ assert '{"id":1,"name":"SOA","studentIds":[]}'
 
 # Publish an assignment.
 hit POST "$HOMEWORK_SVC/assignments" courseId:=1 description='Do something.' "$auth_teacher"
-assert '{"id":1,"courseId":1,"description":"Do something."}'
+assert '{"id":1,"courseId":1,"description":"Do something.","solution":[]}'
 
 # Check the assignment's persistence.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_teacher"
-assert '[{"id":1,"courseId":1,"description":"Do something."}]'
+assert '[{"id":1,"courseId":1,"description":"Do something.","solution":[]}]'
 
 # Check that an unregistered student cannot see the assignment.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
@@ -90,6 +90,6 @@ assert '[{"id":1,"name":"SOA","studentIds":[2]}]'
 
 # Check that the student can now see the assignment.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
-assert '[{"id":1,"courseId":1,"description":"Do something."}]'
+assert '[{"id":1,"courseId":1,"description":"Do something.","solution":[]}]'
 
 echo 'Everything ok!'
