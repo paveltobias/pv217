@@ -8,9 +8,14 @@ import java.util.stream.Stream;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 @Entity
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Assignment extends PanacheEntityBase {
     static List<Assignment> listByCourses(Collection<Course> courses) {
         Set<Long> courseIds = courses
@@ -23,26 +28,16 @@ public class Assignment extends PanacheEntityBase {
             .collect(Collectors.toList());
     }
 
-    /**
-     * Returns all solutions related to the assignment.
-     */
-    public List<Solution> getSolution() {
-        return Solution.list("assignment_id", id);
-    }
-
-    /**
-     * Returns solution of given student.
-     */
-    public List<Solution> getStudentsSolution(Long studentId) {
-        return Solution.find("assignment_id = ?1 and student_id = ?2", id, studentId).firstResult();
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
     public Long courseId;
     public String description;
+
+    @OneToMany(targetEntity = Solution.class, mappedBy = "assignment", fetch = FetchType.LAZY)
+    @JsonIgnore
+    public List<Solution> solution;
 
     //@NotNull
     //@Temporal(TemporalType.DATE)

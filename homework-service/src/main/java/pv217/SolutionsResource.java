@@ -7,12 +7,15 @@ import org.jboss.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
+
+import static pv217.Solution.fetchStudentsSolutions;
 
 @Path("/solutions")
 public class SolutionsResource {
@@ -32,18 +35,33 @@ public class SolutionsResource {
         Set<String> groups = jwt.getGroups();
         if (groups.contains("teacher")) {
             // TODO: return all solutions for all assignments which they have published
+
+
+
         }
         if (groups.contains("student")) {
-            // TODO: return all solutions submitted by the student
+            return fetchStudentsSolutions(Long.decode(jwt.getSubject()));
         }
         return List.of();
     }
 
     @POST
-    @RolesAllowed({"student"})
+    @RolesAllowed("student")
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response postSolution(Solution solution) {
+        // do not allow student to publish marked solution
+        solution.mark = Mark.NA;
+        // do not allow student to publish solution as someone else
+        solution.studentId = Long.decode(jwt.getSubject());
+
+        if (Assignment.findById(solution.assignmentId) == null) {
+            LOG.error("Failed to persist solution because no assignment with id {"
+                    + solution.assignmentId + "} exists");
+            return Response.status(404).build();
+        }
+
         try {
             solution.persist();
         } catch (ConstraintViolationException ex) {
@@ -51,12 +69,13 @@ public class SolutionsResource {
             return Response.status(404).build();
         }
 
+        LOG.info("Successfully published solution id " + solution.id);
         return Response.ok(solution).build();
     }
 
     @PATCH
     @Path("{solution_id}")
-    @RolesAllowed({"teacher"})
+    @RolesAllowed("teacher")
     @Consumes(MediaType.APPLICATION_JSON) // FIXME: maybe there is something better for enum...
     @Produces(MediaType.APPLICATION_JSON)
     public Response markSolution(Mark mark, @PathParam("solution_id") Long solutionId) {
