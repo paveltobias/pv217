@@ -44,6 +44,10 @@ done
 hit POST "$USER_SVC/auth/login" email=john@doe.io pass=heslo123
 auth_teacher="Authorization: Bearer $res"
 
+# Get another teacher's JWT.
+hit POST "$USER_SVC/auth/login" email=farnsworth@planetexpress.com pass=heslo123
+auth_teacher2="Authorization: Bearer $res"
+
 # Get a student's JWT.
 hit POST "$USER_SVC/auth/login" email=alice@bob.io pass=heslo123
 auth_student="Authorization: Bearer $res"
@@ -62,11 +66,15 @@ assert '{"id":1,"name":"SOA","studentIds":[]}'
 
 # Publish an assignment.
 hit POST "$HOMEWORK_SVC/assignments" courseId=1 description='Do something.' "$auth_teacher"
-assert '{"id":1,"courseId":1,"description":"Do something."}'
+assert '{"id":1,"teacherId":1,"courseId":1,"description":"Do something."}'
 
 # Check the assignment's persistence.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_teacher"
-assert '[{"id":1,"courseId":1,"description":"Do something."}]'
+assert '[{"id":1,"teacherId":1,"courseId":1,"description":"Do something."}]'
+
+# Check that another teacher cannot see the assignment
+hit GET "$HOMEWORK_SVC/assignments" "$auth_teacher2"
+assert '[]'
 
 # Check that an unregistered student cannot see the assignment.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
@@ -90,7 +98,7 @@ assert '[{"id":1,"name":"SOA","studentIds":[2]}]'
 
 # Check that the student can now see the assignment.
 hit GET "$HOMEWORK_SVC/assignments" "$auth_student"
-assert '[{"id":1,"courseId":1,"description":"Do something."}]'
+assert '[{"id":1,"teacherId":1,"courseId":1,"description":"Do something."}]'
 
 # Publish a solution to an assignment.
 hit POST "$HOMEWORK_SVC/solutions" content="This is a solution." assignmentId=1 "$auth_student"

@@ -10,7 +10,6 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
@@ -28,10 +27,15 @@ public class Assignment extends PanacheEntityBase {
             .collect(Collectors.toList());
     }
 
+    static List<Assignment> listByTeacher(Long teacherId) {
+        return Assignment.list("teacherId", teacherId);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
+    public Long teacherId;
     public Long courseId;
     public String description;
 
