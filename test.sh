@@ -96,6 +96,10 @@ assert '[{"id":1,"courseId":1,"description":"Do something."}]'
 hit POST "$HOMEWORK_SVC/solutions" content="This is a solution." assignmentId=1 "$auth_student"
 assert '{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"NA"}'
 
+hit PATCH "$HOMEWORK_SVC/solutions/1" "$auth_teacher"
+assert '{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"A"}'
+
+
 sol1=$res
 
 

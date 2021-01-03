@@ -1,7 +1,11 @@
 package pv217;
 
+import io.netty.channel.ChannelHandler;
+import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
 
 import javax.annotation.PostConstruct;
@@ -14,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
+
 
 import static pv217.Solution.fetchStudentsSolutions;
 
@@ -73,14 +78,17 @@ public class SolutionsResource {
         return Response.ok(solution).build();
     }
 
+    @Inject
+    @Channel("marks")
+    Emitter<MarkDTO> marksEmmiter;
+
     @PATCH
     @Path("{solution_id}")
     @RolesAllowed("teacher")
-    @Consumes(MediaType.APPLICATION_JSON) // FIXME: maybe there is something better for enum...
+    //@Consumes(MediaType.APPLICATION_JSON) // FIXME: maybe there is something better for enum...
     @Produces(MediaType.APPLICATION_JSON)
-    public Response markSolution(Mark mark, @PathParam("solution_id") Long solutionId) {
-
-
+    public Response markSolution(/*Mark mark,*/ @PathParam("solution_id") Long solutionId) {
+        Mark mark = Mark.A; // TODO: remove
 
         Solution solution = Solution.findById(solutionId);
 
@@ -89,14 +97,19 @@ public class SolutionsResource {
             return Response.status(404).build();
         }
 
-
         // TODO: check if related Assignment is owned by teacher!
 
+        // inform student
+        MarkDTO markDTO = new MarkDTO();
+        markDTO.assignment = solution.assignment.description;
+        markDTO.mark = mark;
+        markDTO.studentId = solution.studentId;
+        marksEmmiter.send(markDTO);
 
         solution.mark = mark;
         solution.persist();
 
-        return Response.ok().build();
+        return Response.ok(solution).build();
     }
 
 }

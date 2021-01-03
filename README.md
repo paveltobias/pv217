@@ -6,6 +6,7 @@ For now, a rough spec draft/discussion is available [here](https://github.com/pa
 - JDK 11
 - Maven 3.6.2+
 - Docker
+- docker-compose
 - PostgreSQL
 - HTTPie
 

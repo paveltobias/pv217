@@ -3,7 +3,11 @@ package cz.fi.muni.pv217.dlp;
 import cz.fi.muni.pv217.dlp.SmtpServer.Message.EmailMessage;
 import cz.fi.muni.pv217.dlp.SmtpServer.Message.SmtpServerException;
 import cz.fi.muni.pv217.dlp.SmtpServer.SmtpServer;
+import cz.fi.muni.pv217.dlp.external.MarkDTO;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
+import org.reactivestreams.Publisher;
 
 import javax.annotation.security.RolesAllowed;
 import javax.mail.Message;
@@ -15,7 +19,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 // TODO: Remove/replace this resource.
-
 
 @Path("/email")
 public class EmailResource {
@@ -48,6 +51,18 @@ public class EmailResource {
         return "test message sent";
     }
 
+    @Inject
+    @Channel("marks")
+    Publisher<MarkDTO> markPublisher;
+
+
+    @Incoming("marks")
+    public void consumeMarks(MarkDTO mark) {
+        LOG.info("Received mark dto:" + mark.toString());
+
+        // TODO: obtain email (how? I don't have a token...) and send message
+
+    }
 
 
 
