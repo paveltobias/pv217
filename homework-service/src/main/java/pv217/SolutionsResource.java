@@ -41,29 +41,50 @@ public class SolutionsResource {
     @Inject
     JsonWebToken jwt;
 
+    @Inject
+    @Channel("marks")
+    Emitter<MarkDTO> marksEmitter;
+
+    /**
+     * If called by a teacher, returns all solutions for
+     * all assignments that were created by him.
+     * If called by a student, returns all of his solutions.
+     */
     @GET
     @RolesAllowed({"teacher", "student"})
     @Produces(MediaType.APPLICATION_JSON)
     public List<Solution> getSolutions() {
+        Long uid = Long.decode(jwt.getSubject());
         Set<String> groups = jwt.getGroups();
         if (groups.contains("teacher")) {
-            // returns all solutions to all assignments that given teacher has published
+            LOG.info("Fetching solutions to assignments created by teacher id " + uid);
             return Assignment.listByTeacher(Long.decode(jwt.getSubject())).stream()
                     .flatMap(assignment -> assignment.solution.stream()).collect(Collectors.toList());
         }
         if (groups.contains("student")) {
-            // returns all solutions of given student (for any assignments)
+            LOG.info("Fetching solutions published by student id " + uid);
             return fetchStudentsSolutions(Long.decode(jwt.getSubject()));
         }
         return List.of();
     }
 
+    /**
+     * Adds solution to a database.
+     *
+     * Note: student may publish a solution to an assignment
+     * for a course that (s)he does not have. We may implement
+     * check for this later (it would require calling course service).
+     *
+     * TODO: call plagiarism detection service (kafka channel)
+     */
     @POST
     @RolesAllowed("student")
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response postSolution(Solution solution) {
+        LOG.info("Posting solution: " + solution);
+
         // do not allow student to publish marked solution
         solution.mark = Mark.NA;
         // do not allow student to publish solution as someone else
@@ -72,23 +93,19 @@ public class SolutionsResource {
         if (Assignment.findById(solution.assignmentId) == null) {
             LOG.error("Failed to persist solution because no assignment with id {"
                     + solution.assignmentId + "} exists");
-            return Response.status(404).build();
+            return Response.status(400).build();
         }
 
         try {
             solution.persist();
         } catch (ConstraintViolationException ex) {
             LOG.error("Failed to persist solution", ex);
-            return Response.status(404).build();
+            return Response.status(400).build();
         }
 
         LOG.info("Successfully published solution id " + solution.id);
         return Response.ok(solution).build();
     }
-
-    @Inject
-    @Channel("marks")
-    Emitter<MarkDTO> marksEmitter;
 
     @PATCH
     @Path("{solution_id}")
