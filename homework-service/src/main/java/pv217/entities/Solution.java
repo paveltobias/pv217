@@ -1,14 +1,12 @@
-package pv217;
+package pv217.entities;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.List;
 
 
@@ -20,11 +18,6 @@ public class Solution extends PanacheEntityBase {
     public static List<Solution> fetchStudentsSolutions(Long studentId) {
         return Solution.find("studentId", studentId).list();
     }
-
-    //public static List<Solution> fetchTeachersSolutions(Long teacherId) {
-    //    return Solution.find("studentId", studentId).list();
-    //}
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

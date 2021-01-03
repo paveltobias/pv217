@@ -1,4 +1,4 @@
-package pv217;
+package pv217.entities.extern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

@@ -44,7 +44,7 @@ public class MockSmtpServerImpl implements SmtpServer {
 
     @Override
     public void sendMessage(EmailMessage emailMessage) throws SmtpServerException {
-        LOG.debug("Sending message " + emailMessage.toString());
+        LOG.info("Sending message " + emailMessage.toString());
 
         MimeMessage mimeMessage = Util.toMime(session, emailMessage);
 
@@ -53,5 +53,7 @@ public class MockSmtpServerImpl implements SmtpServer {
         } catch (MessagingException e) {
             throw new SmtpServerException("Failed to send message", e);
         }
+
+        LOG.debug("Message sent.");
     }
 }

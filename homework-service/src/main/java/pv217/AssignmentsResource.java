@@ -18,6 +18,8 @@ import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import pv217.entities.Assignment;
+import pv217.entities.extern.Course;
 
 @Path("/assignments")
 public class AssignmentsResource {

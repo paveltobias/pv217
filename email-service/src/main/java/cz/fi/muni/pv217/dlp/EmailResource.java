@@ -57,10 +57,19 @@ public class EmailResource {
 
 
     @Incoming("marks")
-    public void consumeMarks(MarkDTO mark) {
-        LOG.info("Received mark dto:" + mark.toString());
+    public void consumeMarks(MarkDTO markDTO) {
+        LOG.info("Received mark dto:" + markDTO.toString());
 
-        // TODO: obtain email (how? I don't have a token...) and send message
+        EmailMessage emailMessage = new EmailMessage.Builder().setFrom("dlp@gmail.com")
+                .addRecipient(Message.RecipientType.TO, markDTO.email)
+                .setSubject("Solution marked")
+                .setBody("You have received mark " + markDTO.mark + " for your " +
+                        "solution, assignment: " + markDTO.assignment + ".").build();
+        try {
+            smtpServer.sendMessage(emailMessage);
+        } catch (SmtpServerException e) {
+            e.printStackTrace();
+        }
 
     }
 

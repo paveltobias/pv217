@@ -1,4 +1,4 @@
-package pv217;
+package pv217.entities;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,11 +12,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import pv217.entities.extern.Course;
 
 @Entity
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class Assignment extends PanacheEntityBase {
-    static List<Assignment> listByCourses(Collection<Course> courses) {
+    public static List<Assignment> listByCourses(Collection<Course> courses) {
         Set<Long> courseIds = courses
             .stream()
             .map(c -> c.id)
@@ -27,7 +28,7 @@ public class Assignment extends PanacheEntityBase {
             .collect(Collectors.toList());
     }
 
-    static List<Assignment> listByTeacher(Long teacherId) {
+    public static List<Assignment> listByTeacher(Long teacherId) {
         return Assignment.list("teacherId", teacherId);
     }
 
