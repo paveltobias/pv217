@@ -33,7 +33,7 @@ public class AssignmentsResource {
     public List<Assignment> getAssignments() {
         Set<String> groups = jwt.getGroups();
         if (groups.contains("teacher")) {
-            return Assignment.listAll();
+            return Assignment.listByTeacher(Long.decode(jwt.getName()));
         }
         if (groups.contains("student")) {
             return Assignment.listByCourses(getReggedCourses());
@@ -52,6 +52,7 @@ public class AssignmentsResource {
             !courseExists(ass.courseId)) {
             return Response.status(404).build();
         }
+        ass.teacherId = Long.decode(jwt.getName());
         ass.persist();
         return Response.ok(ass).build();
     }
