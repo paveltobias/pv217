@@ -104,6 +104,18 @@ assert '[{"id":1,"teacherId":1,"courseId":1,"description":"Do something."}]'
 hit POST "$HOMEWORK_SVC/solutions" content="This is a solution." assignmentId=1 "$auth_student"
 assert '{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"NA"}'
 
+# Check that student can see his own solution.
+hit GET "$HOMEWORK_SVC/solutions" "$auth_teacher"
+assert '[{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"NA"}]'
+
+# Check that teacher that posted the assignment can this solution.
+hit GET "$HOMEWORK_SVC/solutions" "$auth_teacher"
+assert '[{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"NA"}]'
+
+# Check that another teacher can not see the solutions
+hit GET "$HOMEWORK_SVC/solutions" "$auth_teacher2"
+assert '[]'
+
 # Mark published solution
 hit PATCH "$HOMEWORK_SVC/solutions/1" mark="A" "$auth_teacher"
 assert '{"id":1,"content":"This is a solution.","assignmentId":1,"studentId":2,"mark":"A"}'
