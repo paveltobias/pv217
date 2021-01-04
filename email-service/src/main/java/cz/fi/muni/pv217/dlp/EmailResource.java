@@ -39,7 +39,7 @@ public class EmailResource {
     @GET
     @Path("/test")
     public String test() {
-        EmailMessage emailMessage = new EmailMessage.Builder().setFrom("test_teacher@gmail.com")
+        EmailMessage emailMessage = new EmailMessage.Builder().setFrom("test_teacher@dlpmail.com")
                 .addRecipient(Message.RecipientType.TO, "test_student@mail.muni.cz")
                 .setSubject("test").setBody("hello").build();
         try {

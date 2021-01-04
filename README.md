@@ -25,6 +25,26 @@ It has the following endpoints:
 - `GET /users` -- Lists all users. Can only be successfully called by a teacher (otherwise a `403` response is returned).
 - `GET /users/{id}` -- Returns a single user with a given `{id}`. A student can only retrieve themselves (otherwise a `403` response is returned). A teacher can successfully retrieve anyone.
 
+### Homework Service
+
+This service stores assignments and solutions (of assignments).
+
+It has the following endpoints:
+
+- `GET /assignments` -- If called by a teacher, returns all assignments created by him. If called by a student, returns all assignments from all registered courses.
+- `POST /assignments` -- Creates new assignment. Can only be called by a teacher.
+
+- `GET /solutions` -- If called by a teacher, returns all solutions for all assignments that were created by the teacher. If called by a student, returns all of his/her solutions.
+- `POST /solutions` -- Stores a solution. Can only be called by a student.
+- `PATCH /solution/{id}` -- Marks a solution. Informs student that posted given solution via email-service (reactive). Can only be called by a teacher that created related assignment.
+
+### Email Service
+
+Informs students when their solution gets marked. 
+
+
+## OpenAPI
+
 The aut-generated OpenAPI spec is available at the following endpoints:
 
 - `GET /openapi` (as `application/yaml`);
