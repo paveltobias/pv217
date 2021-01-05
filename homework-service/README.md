@@ -48,3 +48,18 @@ If you want to learn more about building native executables, please consult http
 <p>A Hello World RESTEasy resource</p>
 
 Guide: https://quarkus.io/guides/rest-json
+
+# Metrics
+
+### Prometheus
+```shell script
+docker run --rm --name prometheus -p 9090:9090 --network host \
+-v /path/to/prometheus.yml:/etc/prometheus/prometheus.yml:Z prom/prometheus:v2.14.0 \
+--config.file=/etc/prometheus/prometheus.yml
+```
+
+### Grafana
+```shell script
+docker run --rm -p 3000:3000 --network host grafana/grafana:6.4.4
+```
+Import dashboard from `src/main/resources/grafana-dashboard.json`

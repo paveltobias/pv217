@@ -3,6 +3,10 @@ package pv217;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Gauge;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.logging.Logger;
@@ -35,6 +39,9 @@ public class SolutionsResource {
 
     private static final Logger LOG = Logger.getLogger(SolutionsResource.class);
 
+    // maximum number of solutions returned in one call
+    private long maxSolutionsReturned = 0;
+
     @ConfigProperty(name = "pv217.userServiceBaseUrl")
     String userSvcBaseUrl;
 
@@ -53,19 +60,32 @@ public class SolutionsResource {
     @GET
     @RolesAllowed({"teacher", "student"})
     @Produces(MediaType.APPLICATION_JSON)
+    @Counted(name = "getSolutions", description = "How many times solutions were obtained.")
+    @Timed(name = "getSolutionsTimer", description = "How long it takes to obtain solutions.")
     public List<Solution> getSolutions() {
         Long uid = Long.decode(jwt.getSubject());
         Set<String> groups = jwt.getGroups();
+
+        List<Solution> solutions = null;
         if (groups.contains("teacher")) {
             LOG.info("Fetching solutions to assignments created by teacher id " + uid);
-            return Assignment.listByTeacher(Long.decode(jwt.getSubject())).stream()
+            solutions = Assignment.listByTeacher(Long.decode(jwt.getSubject())).stream()
                     .flatMap(assignment -> assignment.solution.stream()).collect(Collectors.toList());
         }
-        if (groups.contains("student")) {
+        else if (groups.contains("student")) {
             LOG.info("Fetching solutions published by student id " + uid);
-            return fetchStudentsSolutions(Long.decode(jwt.getSubject()));
+            solutions = fetchStudentsSolutions(Long.decode(jwt.getSubject()));
         }
-        return List.of();
+        else {
+            assert false;
+            return List.of();
+        }
+
+        if (solutions.size() > maxSolutionsReturned) {
+            maxSolutionsReturned = solutions.size();
+        }
+
+        return solutions;
     }
 
     /**
@@ -82,6 +102,8 @@ public class SolutionsResource {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Counted(name = "postSolution", description = "How many solutions were posted.")
+    @Timed(name = "postSolutionTimer", description = "How long it takes to post a solution.")
     public Response postSolution(Solution solution) {
         LOG.info("Posting solution: " + solution);
 
@@ -107,11 +129,19 @@ public class SolutionsResource {
         return Response.ok(solution).build();
     }
 
+    /**
+     * Marks a solution. Only teacher that posted
+     * an assignment can mark its solutions.
+     *
+     * Mark can be changed, but not to Mark.NA (no mark).
+     */
     @PATCH
     @Path("{solution_id}")
     @RolesAllowed("teacher")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Counted(name = "markSolution", description = "How many solutions were marked.")
+    @Timed(name = "markSolutionTimer", description = "How long it takes to mark a solution.")
     public Response markSolution(MarkJson markJson, @PathParam("solution_id") Long solutionId) {
         // get solution
         Solution solution = Solution.findById(solutionId);
@@ -120,12 +150,17 @@ public class SolutionsResource {
             return Response.status(404).build();
         }
 
-        // check whether related Assignment is owned by this teacher
         Long teacherId = Long.decode(jwt.getSubject());
+        if (markJson.mark == Mark.NA) {
+            LOG.warn("Teacher id " + teacherId + " tried to change mark of a solution to NA (remove mark).");
+            return Response.status(400).build();
+        }
+
+        // check whether related Assignment is owned by this teacher
         if (!solution.assignment.teacherId.equals(teacherId)) {
             LOG.warn("Teacher id " + teacherId + " tried to mark solution of assignment " +
                     "that (s)he didn't publish");
-            Response.status(403).build();
+            return Response.status(403).build();
         }
 
         solution.mark = markJson.mark;
@@ -162,5 +197,11 @@ public class SolutionsResource {
                 .header("Authorization", "Bearer " + jwt.getRawToken())
                 .get()
                 .readEntity(new GenericType<User>(){});
+    }
+
+    @Gauge(name = "maxSolutionsReturned", unit = MetricUnits.NONE,
+            description = "Maximum number of solutions returned in one GET call.")
+    public Long maxSolutionsReturned() {
+        return maxSolutionsReturned;
     }
 }
