@@ -48,3 +48,10 @@ If you want to learn more about building native executables, please consult http
 <p>A Hello World RESTEasy resource</p>
 
 Guide: https://quarkus.io/guides/rest-json
+
+
+# Health check
+
+In You can manually check health in dev mode by  
+`http :8081/health/liveness`  
+`http :8081/health/readiness`

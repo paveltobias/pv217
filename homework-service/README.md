@@ -63,3 +63,10 @@ docker run --rm --name prometheus -p 9090:9090 --network host \
 docker run --rm -p 3000:3000 --network host grafana/grafana:6.4.4
 ```
 Import dashboard from `src/main/resources/grafana-dashboard.json`
+
+# Health check
+
+In You can manually check health in dev mode by  
+`http :8083/health/liveness`  
+`http :8083/health/readiness`
+

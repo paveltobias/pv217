@@ -34,3 +34,9 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ```shell script
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
+
+# Health check
+
+In You can manually check health in dev mode by  
+`http :8089/health/liveness`  
+`http :8089/health/readiness`
