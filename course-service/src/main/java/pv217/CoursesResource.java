@@ -8,12 +8,7 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -22,6 +17,7 @@ import javax.ws.rs.core.Response;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.jboss.logging.Logger;
 
 @Path("/courses")
@@ -44,6 +40,16 @@ public class CoursesResource {
         return stream
             .map(c -> sanitizeCourse(c))
             .collect(Collectors.toList());
+    }
+
+    @POST
+    @RolesAllowed("teacher")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createCourse(String name) {
+        Course course = new Course();
+        course.name=name;
+        course.persist();
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @GET
@@ -75,9 +81,9 @@ public class CoursesResource {
             course.name = patch.name;
         }
         if (patch.studentIds != null) {
-            if (!areStudentIds(patch.studentIds)) {
-                return Response.status(400).build();
-            }
+                if (!areStudentIds(patch.studentIds)) {
+                    return Response.status(400).build();
+                }
             course.studentIds = patch.studentIds;
         }
         course.persist();

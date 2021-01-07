@@ -199,6 +199,7 @@ public class SolutionsResource {
                 .readEntity(new GenericType<User>(){});
     }
 
+
     @Gauge(name = "maxSolutionsReturned", unit = MetricUnits.NONE,
             description = "Maximum number of solutions returned in one GET call.")
     public Long maxSolutionsReturned() {

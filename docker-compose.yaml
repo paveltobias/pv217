@@ -14,16 +14,91 @@ services:
       LOG_DIR: /tmp/logs
 
   kafka:
-    image: strimzi/kafka:0.19.0-kafka-2.5.0
-    command: [
-        "sh", "-c",
-        "bin/kafka-server-start.sh config/server.properties --override listeners=PLAINTEXT://0.0.0.0:9092 --override advertised.listeners=PLAINTEXT://localhost:9092 --override zookeeper.connect=zookeeper:2181"
-    ]
-    depends_on:
-      - zookeeper
+   image: strimzi/kafka:0.19.0-kafka-2.5.0
+   container_name: kafka
+   command: [
+       "sh", "-c",
+       "bin/kafka-server-start.sh config/server.properties --override listeners=PLAINTEXT://kafka:9092 --override advertised.listeners=PLAINTEXT://kafka:9092 --override zookeeper.connect=zookeeper:2181"
+   ]
+   depends_on:
+     - zookeeper
+   ports:
+     - "9092:9092"
+   environment:
+     LOG_DIR: "/tmp/logs"
+
+  postgresql:
+    image: registry.fedoraproject.org/f33/postgresql
+    env_file:
+      - ./db/postgresql.env
     ports:
-      - "9092:9092"
+      - "5432:5432"
     environment:
       LOG_DIR: "/tmp/logs"
 
+  grafana:
+    image: grafana/grafana:6.4.4
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    ports:
+      - 3000:3000
 
+
+  prometheus:
+    image: prom/prometheus:v2.17.1
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+
+  course-service:
+    build:
+      context: ./course-service
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: course-service-jvm
+    container_name: course-service
+    ports:
+      - 8082:8082
+    depends_on:
+      - postgresql
+
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: email-service-jvm
+    container_name: email-service
+    ports:
+      - 8089:8089
+    depends_on:
+      - postgresql
+
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: user-service-jvm
+    container_name: user-service
+    ports:
+      - 8081:8081
+    depends_on:
+      - postgresql
+
+  homework-service:
+    build:
+      context: ./homework-service
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: homework-service-jvm
+    container_name: homework-service
+    ports:
+      - 8083:8083
+    depends_on:
+      - postgresql
