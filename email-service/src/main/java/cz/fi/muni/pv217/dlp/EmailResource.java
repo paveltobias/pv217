@@ -18,7 +18,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
-// TODO: Remove/replace this resource.
 
 @Path("/email")
 public class EmailResource {
