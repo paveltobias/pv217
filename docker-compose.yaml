@@ -15,6 +15,8 @@ services:
 
   kafka:
    image: strimzi/kafka:0.19.0-kafka-2.5.0
+   environment:
+      LOG_DIR: "/tmp/logs"
    container_name: kafka
    command: [
        "sh", "-c",
@@ -24,8 +26,6 @@ services:
      - zookeeper
    ports:
      - "9092:9092"
-   environment:
-     LOG_DIR: "/tmp/logs"
 
   postgresql:
     image: registry.fedoraproject.org/f33/postgresql
@@ -68,6 +68,8 @@ services:
       - 8082:8082
     depends_on:
       - postgresql
+      - kafka
+      - plagiarism-service
 
   email-service:
     build:
@@ -79,7 +81,19 @@ services:
       - 8089:8089
     depends_on:
       - postgresql
+      - kafka
+      - course-service
 
+  plagiarism-service:
+    build:
+      context: ./plagiarism-service
+      dockerfile: ./src/main/docker/Dockerfile.jvm
+    image: plagiarism-service-jvm
+    container_name: plagiarism-service
+    depends_on:
+      - postgresql
+      - kafka
+      - homework-service
 
   user-service:
     build:
@@ -91,6 +105,7 @@ services:
       - 8081:8081
     depends_on:
       - postgresql
+      - kafka
 
   homework-service:
     build:
@@ -102,3 +117,5 @@ services:
       - 8083:8083
     depends_on:
       - postgresql
+      - kafka
+      - user-service

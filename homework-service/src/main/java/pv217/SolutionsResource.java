@@ -1,5 +1,6 @@
 package pv217;
 
+import io.smallrye.common.annotation.Blocking;
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -9,13 +10,13 @@ import org.eclipse.microprofile.metrics.annotation.Gauge;
 import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.jboss.logging.Logger;
+import org.reactivestreams.Publisher;
 import pv217.entities.Assignment;
 import pv217.entities.Mark;
 import pv217.entities.Solution;
-import pv217.entities.extern.MarkDTO;
-import pv217.entities.extern.MarkJson;
-import pv217.entities.extern.User;
+import pv217.entities.extern.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
@@ -51,6 +52,14 @@ public class SolutionsResource {
     @Inject
     @Channel("marks")
     Emitter<MarkDTO> marksEmitter;
+
+    @Inject
+    @Channel("solutions")
+    Emitter<SolutionDTO> solutionsEmitter;
+
+    @Inject
+    @Channel("plagiarism")
+    Publisher<PlagiarismDTO> longPublisher;
 
     /**
      * If called by a teacher, returns all solutions for
@@ -95,7 +104,7 @@ public class SolutionsResource {
      * for a course that (s)he does not have. We may implement
      * check for this later (it would require calling course service).
      *
-     * TODO: call plagiarism detection service (kafka channel)
+     *
      */
     @POST
     @RolesAllowed("student")
@@ -125,9 +134,14 @@ public class SolutionsResource {
             return Response.status(400).build();
         }
 
+        SolutionDTO solutionDTO = SolutionDTO.create(solution);
+        solutionsEmitter.send(solutionDTO);
+
         LOG.info("Successfully published solution id " + solution.id);
         return Response.ok(solution).build();
     }
+
+
 
     /**
      * Marks a solution. Only teacher that posted
@@ -167,7 +181,7 @@ public class SolutionsResource {
 
         // create data transfer object. This is expensive, because it
         // needs to find user (contact other service). We could delegate
-        // finding user to EmailSevice but we would have to send token too (I think)
+        // finding user to EmailService but we would have to send token too (I think)
         MarkDTO markDTO = MarkDTO.create(solution, obtainUser(solution.studentId));
 
         // inform student (fire and forget)
@@ -175,6 +189,20 @@ public class SolutionsResource {
 
         solution.persist();
         return Response.ok(solution).build();
+    }
+
+    @Transactional
+    @Blocking
+    @Incoming("plagiarism")
+    public void markPlagiate(PlagiarismDTO plag){
+        if ( plag != null && plag.id !=null) {
+            Solution solution = Solution.findById(plag.id);
+            solution.isOriginal = false;
+            solution.persist();
+        }
+        else{
+            LOG.error("Received null ID");
+        }
     }
 
     private User obtainUser(Long userID) {

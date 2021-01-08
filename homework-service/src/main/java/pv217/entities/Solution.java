@@ -41,6 +41,8 @@ public class Solution extends PanacheEntityBase {
     @NotNull
     public Mark mark;
 
+    public boolean isOriginal=true;
+
     //@NotNull
     //@Temporal(TemporalType.DATE)
     //public Date submissionDate;
@@ -57,6 +59,7 @@ public class Solution extends PanacheEntityBase {
                 ", assignment=" + assignment +
                 ", assignmentId=" + assignmentId +
                 ", mark=" + mark +
+                ", Original Work=" + isOriginal +
                 '}';
     }
 }
