@@ -1,0 +1,11 @@
+pv217/user/resources/UsersResource.class
+pv217/user/health/DatabaseConnectionHealthCheck.class
+pv217/user/entities/Role$1.class
+pv217/user/resources/AuthResource.class
+pv217/user/models/UserInfo.class
+pv217/user/models/User.class
+META-INF/panache-archive.marker
+pv217/user/models/LoginInfo.class
+pv217/user/entities/Person.class
+pv217/user/entities/Role.class
+pv217/user/health/SimpleLivenessCheck.class

@@ -1,0 +1,15 @@
+cz/fi/muni/pv217/dlp/SmtpServer/SmtpServer.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/EmailMessage$Builder.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/Util.class
+cz/fi/muni/pv217/dlp/EmailResource.class
+cz/fi/muni/pv217/dlp/health/SimpleLivenessCheck.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/EmailMessage.class
+cz/fi/muni/pv217/dlp/SmtpServer/MockSmtpServerImpl.class
+cz/fi/muni/pv217/dlp/external/MarkDTO.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/EmailMessage$1.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/SmtpServerException.class
+cz/fi/muni/pv217/dlp/SmtpServer/Message/Recipient.class
+cz/fi/muni/pv217/dlp/SmtpServer/SmtpServerProducer.class
+META-INF/panache-archive.marker
+cz/fi/muni/pv217/dlp/external/Mark.class
+cz/fi/muni/pv217/dlp/external/MarkDeserializer.class

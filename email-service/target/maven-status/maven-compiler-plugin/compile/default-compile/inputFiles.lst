@@ -1,0 +1,12 @@
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/Message/EmailMessage.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/SmtpServerProducer.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/MockSmtpServerImpl.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/EmailResource.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/external/MarkDeserializer.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/Message/Util.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/external/MarkDTO.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/external/Mark.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/SmtpServer.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/Message/SmtpServerException.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/SmtpServer/Message/Recipient.java
+/home/svoro/pv217/email-service/src/main/java/cz/fi/muni/pv217/dlp/health/SimpleLivenessCheck.java

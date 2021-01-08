@@ -1,0 +1,6 @@
+/home/svoro/pv217/course-service/src/main/java/pv217/Course.java
+/home/svoro/pv217/course-service/src/main/java/pv217/Utils.java
+/home/svoro/pv217/course-service/src/main/java/pv217/health/SimpleLivenessCheck.java
+/home/svoro/pv217/course-service/src/main/java/pv217/User.java
+/home/svoro/pv217/course-service/src/main/java/pv217/CoursesResource.java
+/home/svoro/pv217/course-service/src/main/java/pv217/health/DatabaseConnectionHealthCheck.java

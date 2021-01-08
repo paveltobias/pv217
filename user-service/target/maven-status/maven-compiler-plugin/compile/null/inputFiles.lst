@@ -1,0 +1,7 @@
+/home/svoro/pv217/user-service/src/main/java/pv217/user/models/LoginInfo.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/models/User.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/models/UserInfo.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/resources/AuthResource.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/entities/Person.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/entities/Role.java
+/home/svoro/pv217/user-service/src/main/java/pv217/user/resources/UsersResource.java
