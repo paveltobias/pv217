@@ -11,10 +11,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -62,18 +62,17 @@ public class AssignmentsResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Counted(name = "postAssignment", description = "How many assignments were posted.")
     @Timed(name = "postAssignmentTimer", description = "How long it takes to post an assignment.")
-    public Response postAssignment(Assignment ass) {
+    public Assignment postAssignment(Assignment ass) {
         LOG.info("Posting assignment " + ass.toString());
 
         if (ass.description == null ||
             ass.courseId == null ||
             !courseExists(ass.courseId)) {
-            LOG.error("Trying to post invalid assignment");
-            return Response.status(404).build();
+            throw new WebApplicationException(404);
         }
         ass.teacherId = Long.decode(jwt.getName());
         ass.persist();
-        return Response.ok(ass).build();
+        return ass;
     }
 
     List<Course> getReggedCourses() {

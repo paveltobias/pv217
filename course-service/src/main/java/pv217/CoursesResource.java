@@ -14,10 +14,10 @@ import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.http.client.utils.URIBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -50,11 +50,12 @@ public class CoursesResource {
     @Path("{id}")
     @RolesAllowed("teacher")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCourse(@PathParam("id") Long id) {
+    public Course getCourse(@PathParam("id") Long id) {
         Course course = Course.findById(id);
-        return course != null
-            ? Response.ok(course).build()
-            : Response.status(404).build();
+        if (course == null) {
+            throw new WebApplicationException(404);
+        }
+        return course;
     }
 
     @PATCH
@@ -63,25 +64,25 @@ public class CoursesResource {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response patchCourse(
+    public Course patchCourse(
         @PathParam("id") Long courseId,
         Course patch
     ) {
         Course course = Course.findById(courseId);
         if (course == null) {
-            return Response.status(404).build();
+            throw new WebApplicationException(404);
         }
         if (patch.name != null) {
             course.name = patch.name;
         }
         if (patch.studentIds != null) {
             if (!areStudentIds(patch.studentIds)) {
-                return Response.status(400).build();
+                throw new WebApplicationException(400);
             }
             course.studentIds = patch.studentIds;
         }
         course.persist();
-        return Response.ok(sanitizeCourse(course)).build();
+        return sanitizeCourse(course);
     }
 
     Course sanitizeCourse(Course course) {

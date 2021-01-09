@@ -25,7 +25,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
@@ -104,7 +103,7 @@ public class SolutionsResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Counted(name = "postSolution", description = "How many solutions were posted.")
     @Timed(name = "postSolutionTimer", description = "How long it takes to post a solution.")
-    public Response postSolution(Solution solution) {
+    public Solution postSolution(Solution solution) {
         LOG.info("Posting solution: " + solution);
 
         // do not allow student to publish marked solution
@@ -115,18 +114,18 @@ public class SolutionsResource {
         if (Assignment.findById(solution.assignmentId) == null) {
             LOG.error("Failed to persist solution because no assignment with id {"
                     + solution.assignmentId + "} exists");
-            return Response.status(400).build();
+            throw new WebApplicationException(404);
         }
 
         try {
             solution.persist();
         } catch (ConstraintViolationException ex) {
             LOG.error("Failed to persist solution", ex);
-            return Response.status(400).build();
+            throw new WebApplicationException(400);
         }
 
         LOG.info("Successfully published solution id " + solution.id);
-        return Response.ok(solution).build();
+        return solution;
     }
 
     /**
@@ -142,25 +141,25 @@ public class SolutionsResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Counted(name = "markSolution", description = "How many solutions were marked.")
     @Timed(name = "markSolutionTimer", description = "How long it takes to mark a solution.")
-    public Response markSolution(MarkJson markJson, @PathParam("solution_id") Long solutionId) {
+    public Solution markSolution(MarkJson markJson, @PathParam("solution_id") Long solutionId) {
         // get solution
         Solution solution = Solution.findById(solutionId);
         if (solution == null) {
             LOG.error("Failed to find solution with id " + solutionId);
-            return Response.status(404).build();
+            throw new WebApplicationException(404);
         }
 
         Long teacherId = Long.decode(jwt.getSubject());
         if (markJson.mark == Mark.NA) {
             LOG.warn("Teacher id " + teacherId + " tried to change mark of a solution to NA (remove mark).");
-            return Response.status(400).build();
+            throw new WebApplicationException(400);
         }
 
         // check whether related Assignment is owned by this teacher
         if (!solution.assignment.teacherId.equals(teacherId)) {
             LOG.warn("Teacher id " + teacherId + " tried to mark solution of assignment " +
                     "that (s)he didn't publish");
-            return Response.status(403).build();
+            throw new WebApplicationException(403);
         }
 
         solution.mark = markJson.mark;
@@ -174,7 +173,7 @@ public class SolutionsResource {
         marksEmitter.send(markDTO);
 
         solution.persist();
-        return Response.ok(solution).build();
+        return solution;
     }
 
     private User obtainUser(Long userID) {

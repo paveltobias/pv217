@@ -13,8 +13,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -29,7 +29,7 @@ public class UsersResource {
     @GET
     @RolesAllowed("teacher")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUsers(@QueryParam("id") String id) {
+    public List<User> getUsers(@QueryParam("id") String id) {
         Stream<Person> stream;
         if (id != null) {
             try {
@@ -39,7 +39,7 @@ public class UsersResource {
                     .collect(Collectors.toSet());
                 stream = Person.streamByIds(ids);
             } catch (NumberFormatException e) {
-                return Response.status(404).build();
+                throw new WebApplicationException(404);
             }
         } else {
             stream = Person.streamAll();
@@ -47,23 +47,23 @@ public class UsersResource {
         List<User> users = stream
             .map(p -> buildUser(p))
             .collect(Collectors.toList());
-        return Response.ok(users).build();
+        return users;
     }
 
     @GET
     @Path("{id}")
     @RolesAllowed({"teacher", "student"})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserById(@PathParam("id") Long id) {
+    public User getUserById(@PathParam("id") Long id) {
         if (Long.decode(jwt.getSubject()).equals(id) &&
             !jwt.getGroups().contains("teacher")) {
-            return Response.status(403).build();
+                throw new WebApplicationException(403);
         }
         Person person = Person.findById(id);
         if (person == null) {
-            return Response.status(404).build();
+            throw new WebApplicationException(404);
         }
-        return Response.ok(buildUser(person)).build();
+        return buildUser(person);
     }
 
     User buildUser(Person person) {

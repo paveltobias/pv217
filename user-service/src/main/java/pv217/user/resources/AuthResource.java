@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,18 +23,18 @@ public class AuthResource {
     @PermitAll
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public Response logIn(LoginInfo info) {
+    public String logIn(LoginInfo info) {
         Person person = Person.findByEmail(info.email);
         if (person == null) {
-            return Response.status(404).build();
+            throw new WebApplicationException(404);
         }
         if (!info.pass.equals(person.password)) {
-            return Response.status(401).build();
+            throw new WebApplicationException(401);
         }
         HashSet<String> groups = new HashSet<String>(
             List.of(person.role.toString())
         );
         String jwt = Jwt.groups(groups).subject(person.id.toString()).sign();
-        return Response.ok(jwt).build();
+        return jwt;
     }
 }

@@ -1,0 +1,138 @@
+---
+openapi: 3.0.3
+info:
+  title: Homework Service API
+  description: Service for publishing assignments and handing in solutions
+  version: "1.0"
+paths:
+  /assignments:
+    get:
+      operationId: getAssignments
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListAssignment'
+    post:
+      operationId: postAssignment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assignment'
+  /solutions:
+    get:
+      operationId: getSolutions
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSolution'
+    post:
+      operationId: postSolution
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Solution'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solution'
+  /solutions/{solution_id}:
+    patch:
+      operationId: markSolution
+      parameters:
+      - name: solution_id
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkJson'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solution'
+components:
+  schemas:
+    Solution:
+      required:
+      - assignmentId
+      - mark
+      type: object
+      properties:
+        assignmentId:
+          format: int64
+          type: integer
+          nullable: false
+        content:
+          type: string
+        id:
+          format: int64
+          type: integer
+        mark:
+          allOf:
+          - $ref: '#/components/schemas/Mark'
+          - nullable: false
+        studentId:
+          format: int64
+          type: integer
+    ListSolution:
+      type: array
+      items:
+        $ref: '#/components/schemas/Solution'
+    Mark:
+      enum:
+      - A
+      - B
+      - C
+      - D
+      - E
+      - F
+      - NA
+      type: string
+    MarkJson:
+      type: object
+      properties:
+        mark:
+          $ref: '#/components/schemas/Mark'
+    Assignment:
+      type: object
+      properties:
+        courseId:
+          format: int64
+          type: integer
+        description:
+          type: string
+        id:
+          format: int64
+          type: integer
+        teacherId:
+          format: int64
+          type: integer
+    ListAssignment:
+      type: array
+      items:
+        $ref: '#/components/schemas/Assignment'
