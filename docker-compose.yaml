@@ -8,7 +8,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
     depends_on:
       - postgres
 
@@ -20,7 +20,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
       pv217.userServiceBaseUrl: http://pv217_user:8081
     depends_on:
       - postgres
@@ -33,7 +33,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+      quarkus.datasource.jdbc.url: jdbc:postgresql://postgres:5432/d
       kafka.bootstrap.servers: kafka:9092
       pv217.userServiceBaseUrl: http://pv217_user:8081
       pv217.courseServiceBaseUrl: http://pv217_course:8082
@@ -54,8 +54,17 @@ services:
       - postgres
       - kafka
 
+  plagiarism:
+    container_name: pv217_plagiarism
+    build:
+      context: plagiarism-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    depends_on:
+      - postgres
+      - kafka
+
   postgres:
-    container_name: pv217_postgres
+    container_name: postgres
     image: registry.fedoraproject.org/f33/postgresql
     ports:
       - "5432:5432"
