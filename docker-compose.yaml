@@ -1,6 +1,68 @@
-version: '2'
-
+version: "3"
 services:
+  user:
+    container_name: pv217_user
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+    depends_on:
+      - postgres
+
+  course:
+    container_name: pv217_course
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: course-service
+    ports:
+      - "8082:8082"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+      pv217.userServiceBaseUrl: http://pv217_user:8081
+    depends_on:
+      - postgres
+
+  homework:
+    container_name: pv217_homework
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: homework-service
+    ports:
+      - "8083:8083"
+    environment:
+      quarkus.datasource.jdbc.url: jdbc:postgresql://pv217_postgres:5432/d
+      kafka.bootstrap.servers: kafka:9092
+      pv217.userServiceBaseUrl: http://pv217_user:8081
+      pv217.courseServiceBaseUrl: http://pv217_course:8082
+    depends_on:
+      - postgres
+      - kafka
+
+  email:
+    container_name: pv217_email
+    build:
+      dockerfile: src/main/docker/Dockerfile.jvm
+      context: email-service
+    ports:
+      - "8089:8089"
+    environment:
+      kafka.bootstrap.servers: kafka:9092
+    depends_on:
+      - postgres
+      - kafka
+
+  postgres:
+    container_name: pv217_postgres
+    image: registry.fedoraproject.org/f33/postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRESQL_USER: u
+      POSTGRESQL_PASSWORD: p
+      POSTGRESQL_DATABASE: d
 
   zookeeper:
     image: strimzi/kafka:0.19.0-kafka-2.5.0
@@ -17,7 +79,7 @@ services:
     image: strimzi/kafka:0.19.0-kafka-2.5.0
     command: [
         "sh", "-c",
-        "bin/kafka-server-start.sh config/server.properties --override listeners=PLAINTEXT://0.0.0.0:9092 --override advertised.listeners=PLAINTEXT://localhost:9092 --override zookeeper.connect=zookeeper:2181"
+        "bin/kafka-server-start.sh config/server.properties --override listeners=PLAINTEXT://0.0.0.0:9092 --override advertised.listeners=PLAINTEXT://kafka:9092 --override zookeeper.connect=zookeeper:2181"
     ]
     depends_on:
       - zookeeper
@@ -25,5 +87,3 @@ services:
       - "9092:9092"
     environment:
       LOG_DIR: "/tmp/logs"
-
-
