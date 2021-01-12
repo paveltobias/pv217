@@ -48,3 +48,8 @@ The aut-generated OpenAPI spec is available at the following endpoints:
 
 - `GET /openapi` (as `application/yaml`);
 - `GET /swagger-ui` (graphical representation).
+## Running in docker-compose
+Create jars for every service with
+`./mvnw package`
+Then you can run everything with 
+`docker-compose up --build`
