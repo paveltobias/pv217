@@ -1,0 +1,79 @@
+---
+openapi: 3.0.3
+info:
+  title: User Service API
+  description: Service for auth and listing of users
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      operationId: logIn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginInfo'
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /users:
+    get:
+      operationId: getUsers
+      parameters:
+      - name: id
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUser'
+  /users/{id}:
+    get:
+      operationId: getUserById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          format: int64
+          type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+components:
+  schemas:
+    LoginInfo:
+      type: object
+      properties:
+        email:
+          type: string
+        pass:
+          type: string
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        role:
+          type: string
+    ListUser:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'

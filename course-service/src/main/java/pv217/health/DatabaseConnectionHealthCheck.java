@@ -7,6 +7,7 @@ import org.eclipse.microprofile.health.Readiness;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

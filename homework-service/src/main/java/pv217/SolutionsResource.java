@@ -97,6 +97,19 @@ public class SolutionsResource {
         return solutions;
     }
 
+    @GET
+    @Path("plagiates")
+    @RolesAllowed("teacher")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<Solution> listPlagiates(){
+        Long uid = Long.decode(jwt.getSubject());
+        List<Solution> solutions = null;
+        LOG.info("Fetching plagiates to assignments created by teacher id " + uid);
+        solutions = Assignment.listByTeacher(uid).stream()
+                .flatMap(assignment -> assignment.solution.stream().filter(solution -> !solution.isOriginal)).collect(Collectors.toList());
+        return solutions;
+    }
     /**
      * Adds solution to a database.
      *

@@ -1,0 +1,10 @@
+
+apiVersion: 1
+
+datasources:
+- name: prometheus
+  type: prometheus
+  access: direct
+  url: http://0.0.0.0:9090
+  isDefault: true
+  basicAuth: false

@@ -1,0 +1,76 @@
+---
+openapi: 3.0.3
+info:
+  title: Course Service API
+  description: Service for storage and listing of course information
+  version: "1.0"
+paths:
+  /courses:
+    get:
+      operationId: getCourses
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCourse'
+  /courses/{id}:
+    get:
+      operationId: getCourse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+    patch:
+      operationId: patchCourse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            format: int64
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Course'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+components:
+  schemas:
+    ListLong:
+      type: array
+      items:
+        format: int64
+        type: integer
+    Course:
+      type: object
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        studentIds:
+          $ref: '#/components/schemas/ListLong'
+    ListCourse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Course'
